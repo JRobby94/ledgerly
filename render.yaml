@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ledgerly
+    runtime: docker
+    plan: free
+    envVars:
+      - key: LEDGERLY_TRANSPORT
+        value: streamable-http
+      - key: LEDGERLY_API_KEY
+        sync: false

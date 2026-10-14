@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "ledgerly": {
+      "command": "python",
+      "args": ["-m", "server.server"],
+      "cwd": "C:\\Users\\build\\Ledgerly Portfolio Project\\ledgerly"
+    }
+  }
+}
