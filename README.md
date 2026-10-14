@@ -7,6 +7,15 @@ Ask Claude plain-English questions about a shop's sales, inventory, and customer
 
 > All data is synthetic. A seed script generates six months of fake orders for a demo online shop.
 
+**Live server:** [`https://ledgerly-tnd4.onrender.com/mcp`](https://ledgerly-tnd4.onrender.com/mcp) — this is a real, running deployment, not a mockup. It's an MCP endpoint, not a webpage, so visiting it directly in a browser just returns `401 Unauthorized` (no API key) — that's the access control working as intended, not a broken link. Proof it works:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" -X POST https://ledgerly-tnd4.onrender.com/mcp -d '{}'
+# -> 401
+```
+
+To see it actually answer a question, watch the demo below — it's Claude talking to this exact server.
+
 ![Ledgerly demo: asking why revenue dropped, and the live tool calls behind the answer](docs/demo.gif)
 
 ## What it does
@@ -98,11 +107,11 @@ A scheduled task can only reach your server if it's online when the task fires, 
 4. **Environment variables** — if you used Render's "New → Web Service" wizard (rather than a Blueprint deploy from `render.yaml`), add these by hand under Environment:
    - `LEDGERLY_TRANSPORT` = `streamable-http` (literal value — this isn't a secret, it's what tells the server to run as an HTTP service instead of local stdio)
    - `LEDGERLY_API_KEY` = a long random string (Render's "Generate" button on the value field works well)
-5. **Deploy**, then verify the API key gate is actually live:
+5. **Deploy**, then verify the API key gate is actually live. This project's own deployment is at `https://ledgerly-tnd4.onrender.com` — substitute your own app's URL and key:
 
    ```bash
    # No key — must be 401
-   curl -s -o /dev/null -w "%{http_code}\n" -X POST https://<your-app>.onrender.com/mcp -d '{}'
+   curl -s -o /dev/null -w "%{http_code}\n" -X POST https://ledgerly-tnd4.onrender.com/mcp -d '{}'
 
    # Valid key — must not be 401
    curl -s -o /dev/null -w "%{http_code}\n" -X POST https://<your-app>.onrender.com/mcp \
@@ -111,7 +120,7 @@ A scheduled task can only reach your server if it's online when the task fires, 
      -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"verify","version":"1.0"}}}'
    ```
 
-6. **Add it to Claude as a custom connector:** URL `https://<your-app>.onrender.com/mcp`, Authentication set to **"No sign-in"** (not OAuth — Ledgerly doesn't implement an OAuth flow, it's a static API key), and a custom request header `Authorization: Bearer <your-key>`. If the connector form only exposes a single "API key" field instead of raw headers, paste just the key value there with no `Bearer ` prefix — the client adds that for you, and typing it yourself produces a malformed `Bearer Bearer <key>` header that gets rejected.
+6. **Add it to Claude as a custom connector:** URL `https://<your-app>.onrender.com/mcp` (for this deployment: `https://ledgerly-tnd4.onrender.com/mcp`), Authentication set to **"No sign-in"** (not OAuth — Ledgerly doesn't implement an OAuth flow, it's a static API key), and a custom request header `Authorization: Bearer <your-key>`. If the connector form only exposes a single "API key" field instead of raw headers, paste just the key value there with no `Bearer ` prefix — the client adds that for you, and typing it yourself produces a malformed `Bearer Bearer <key>` header that gets rejected.
 
 ### Known free-tier caveats (by design, not bugs)
 
